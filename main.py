@@ -6,15 +6,16 @@ from random import randint
 class Snake:
     def __init__(self, screen):
         self.__screen = screen # Configura a tela em que a cobra aparecerá
-        self.__largura = 10 # Define a largura da cobra
-        self.__altura = 10 # Define a altura da cobra
+        self.__largura = 20 # Define a largura da cobra
+        self.__altura = 20 # Define a altura da cobra
         self.x = 100 # Define a coordenada x da cobra
         self.y = 100 # Define a coordenada y da cobra
-        self.speed = 1 # Velocidade da cobra
+        self.speed = 1/4 # Velocidade da cobra
         self.body_size = 0 # Tamanho do corpo da cobra (excluindo a cabeça)
         self.__old_coords = [] # Lista com as coordenadas das partes do corpo da cobra
         self.__direction = "" # Armazena a direção da cobra
         self.__direction_cache = "" # Caso a direção não possa ser mudada, armazena um cache até que seja possível
+        self.count_frames = 0 
         self.draw() # Desenha a cobra
     
     def draw(self):
@@ -33,7 +34,7 @@ class Snake:
     # "Setter" para a direção da cobra (só muda em posições múltiplas de 10)
     @direction.setter
     def direction(self, direction):
-        if self.x % 10 == 0 and self.y % 10 == 0:
+        if self.x % 20 == 0 and self.y % 20 == 0:
             self.__direction = direction
 
     # Altera a direção caso alguma das teclas "wasd" sejam apertadas
@@ -49,22 +50,24 @@ class Snake:
         self.direction = self.__direction_cache # Tenta alterar a direção até que seja viável
 
     def move(self):
-        self.__old_coords.append((self.x, self.y)) # Adiciona as coordenadas antigas da cabeça da cobra, para que seja utilizada no corpo
+        self.count_frames += 1
         while len(self.__old_coords) > self.body_size:
-            self.__old_coords.pop(0)
-        print(self.__old_coords)
+            self.__old_coords.pop(-1)
+        if self.count_frames % round(1/self.speed) == 0:
+            self.check_direction("") # Tenta mudar a direção, caso ela não tenha sido mudada
 
-        self.check_direction("") # Tenta mudar a direção, caso ela não tenha sido mudada
+            self.__old_coords.insert(0, (self.x, self.y)) # Adiciona as coordenadas antigas da cabeça da cobra, para que seja utilizada no corpo
 
-        # Movimentação básica da cobra
-        if self.direction == "left":
-            self.x -= self.speed*10
-        elif self.direction == "right":
-            self.x += self.speed*10
-        elif self.direction == "up":
-            self.y -= self.speed*10
-        elif self.direction == "down":
-            self.y += self.speed*10
+
+            # Movimentação básica da cobra
+            if self.direction == "left":
+                self.x -= 20
+            elif self.direction == "right":
+                self.x += 20
+            elif self.direction == "up":
+                self.y -= 20
+            elif self.direction == "down":
+                self.y += 20    
 
         self.draw() # Redesenha a cobra na sua nova posição
     
@@ -77,8 +80,8 @@ class Apple:
         self.screen = screen
         resolution = self.screen.get_size() # Armazena a resolução da tela
         self.size = size
-        self.x = randint(0,resolution[0] - size)//10*10 # Randomiza a posição x da maçã
-        self.y = randint(0,resolution[1] - size)//10*10 # Randomiza a posição y da maçã
+        self.x = randint(0,resolution[0] - size)//size*size # Randomiza a posição x da maçã
+        self.y = randint(0,resolution[1] - size)//size*size # Randomiza a posição y da maçã
         self.draw() # Desenha a maçã
 
     def draw(self):
@@ -88,10 +91,10 @@ class Apple:
 class Game:
     def __init__(self, resolution):
         pygame.init() # Inicia o módulo pygame
-        self.screen = pygame.display.set_mode(resolution) # Define a resolução do jogo
+        self.screen = pygame.display.set_mode(resolution, pygame.RESIZABLE|pygame.DOUBLEBUF) # Define a resolução do jogo
         self.screen.fill((0,0,0)) # Preenche o background com a cor preta
         self.snake = Snake(self.screen) # Cria o objeto COBRA
-        self.apple = Apple(self.screen, 10) # Cria o objeto MAÇÃ
+        self.apple = Apple(self.screen, 20) # Cria o objeto MAÇÃ
         self.font = pygame.font.SysFont("comicsans", 30, True) # Define a fonte dos textos
         self.score = 0 # Cria um atributo de pontuação
 
@@ -100,7 +103,7 @@ class Game:
         clock = pygame.time.Clock() # Cria um objeto de relógio
 
         while running:
-            clock.tick(30) # Define o FPS do jogo para 30
+            clock.tick(60) # Define o FPS do jogo para 30
             self.screen.fill((0,0,0)) # Preenche a tela com um retângulo preto (para atualizar as posições)
             resolution = self.screen.get_size() # Armazena a resolução da tela 
             self.screen.blit(self.font.render("Pontuação: " + str(self.score), 1, (255,255,255)), (resolution[0] - 250,10)) # Escreve a pontuação na tela
@@ -119,7 +122,7 @@ class Game:
                 del self.apple # Remove a maça
                 self.score += 1 # Adiciona 1 à pontuação
                 self.snake.body_size += 1 # Adiciona 1 ao corpo da cobra
-                self.apple = Apple(self.screen, 10) # Cria uma nova maça na tela
+                self.apple = Apple(self.screen, 20) # Cria uma nova maça na tela
 
             pygame.display.update() # Atualiza a tela
 
