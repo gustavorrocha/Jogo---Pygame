@@ -10,7 +10,7 @@ class Snake:
         self.__altura = 20 # Define a altura da cobra
         self.x = 100 # Define a coordenada x da cobra
         self.y = 100 # Define a coordenada y da cobra
-        self.speed = 1/4 # Velocidade da cobra
+        self.speed = 1/5 # Velocidade da cobra
         self.body_size = 0 # Tamanho do corpo da cobra (excluindo a cabeça)
         self.__old_coords = [] # Lista com as coordenadas das partes do corpo da cobra
         self.__direction = "" # Armazena a direção da cobra
@@ -72,7 +72,7 @@ class Snake:
                 self.y -= 20
             elif self.direction == "down":
                 self.y += 20    
-                
+
         self.draw() # Redesenha a cobra na sua nova posição
     
     def eat_apple(self):
@@ -101,6 +101,7 @@ class Lumberjack:
         self.direction = 0 # Armazena a direção do lenhador
         self.count_frames = 0 # Cria o contador de frames
         self.is_smart = randint(0,1) # Randomiza se o lenhador será inteligente (irá atrás das maçãs) ou não
+        self.effect = randint(0,1) # Adiciona efeitos para a ingestão do lenhador
         self.draw() # Desenha a maçã
 
     def draw(self):
@@ -166,17 +167,34 @@ class Game:
         self.apple = Apple(self.screen, 20) # Cria o objeto MAÇÃ
         self.lumberjack = Lumberjack(self.screen, 20) # Cria o objeto LENHADOR
         self.font = pygame.font.SysFont("comicsans", 30, True) # Define a fonte dos textos
+        self.current_effects = {} # Dicionário com todos os efeitos que estão ocorrendo
+        self.fps = 60 # Define o FPS do jogo para 60
         self.score = 0 # Cria um atributo de pontuação
+
+    def apply_effects(self):
+        self.snake.speed = 1/5 # Reseta a velocidade da cobra 
+
+        # Percorre todos os efeitos atuais
+        for effect in self.current_effects:
+            # Roda o efeito caso ainda exista duração
+            if self.current_effects[effect] > 0: 
+                if effect == "faster": 
+                    self.snake.speed = 1/3
+                elif effect == "slower":
+                    self.snake.speed = 1/8
+                self.current_effects[effect] -= 1 # Atualiza a duração do efeito
 
     def run(self):
         running = True
         clock = pygame.time.Clock() # Cria um objeto de relógio
 
         while running:
-            clock.tick(60) # Define o FPS do jogo para 30
+            clock.tick(self.fps) 
             self.screen.fill((0,0,0)) # Preenche a tela com um retângulo preto (para atualizar as posições)
             resolution = self.screen.get_size() # Armazena a resolução da tela 
             self.screen.blit(self.font.render("Pontuação: " + str(self.score), 1, (255,255,255)), (resolution[0] - 250,10)) # Escreve a pontuação na tela
+
+            self.apply_effects()
             self.apple.draw() # Desenha a maça
             self.lumberjack.move(self.apple) # Roda a movimentação do lehador
             self.snake.move() # Roda a função para a cobra se mover
@@ -203,6 +221,13 @@ class Game:
 
             # Condicional da cobra passar pelo lenhador
             if (self.snake.x,self.snake.y) == (self.lumberjack.x, self.lumberjack.y):
+
+                # Adiciona o efeito do lenhador
+                if self.lumberjack.effect == 0:
+                    self.current_effects["faster"] = 2*self.fps # Deixar a cobra mais lenta
+                elif self.lumberjack.effect == 1:
+                    self.current_effects["slower"] = 2*self.fps # Deixar a cobra mais rápida
+    
                 del self.lumberjack # Remove o lenhador
                 self.score += 1 # Adiciona 1 à pontuação
                 self.lumberjack = Lumberjack(self.screen, 20) # Cria um novo lenhador na tela
