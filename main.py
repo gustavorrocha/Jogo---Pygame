@@ -17,6 +17,7 @@ class Snake:
         self.__direction_cache = "" # Caso a direção não possa ser mudada, armazena um cache até que seja possível
         self.count_frames = 0 # Cria o contador de frames
         self.draw() # Desenha a cobra
+        self.isdeph = False # Define se a cobra está morta
     
     def draw(self):
         pygame.draw.rect(self.__screen, (255,195,0), (self.x, self.y, self.__largura, self.__altura)) # Desenha a cabeça da cobra
@@ -65,13 +66,25 @@ class Snake:
 
             # Movimentação básica da cobra
             if self.direction == "left":
-                self.x -= 20
+                if self.x == 40 or self.x in [x-20 for x in list(zip(*self.__old_coords))[0]]:
+                    self.isdeph = True
+                else:
+                    self.x -= 20
             elif self.direction == "right":
-                self.x += 20
+                if self.x == 1220 or  self.x in [x+20 for x in list(zip(*self.__old_coords))[0]]:
+                    self.isdeph = True
+                else:            
+                    self.x += 20
             elif self.direction == "up":
-                self.y -= 20
+                if self.y == 60 or self.y in [x-20 for x in list(zip(*self.__old_coords))[1]]:
+                    self.isdeph = True
+                else: 
+                    self.y -= 20
             elif self.direction == "down":
-                self.y += 20    
+                if self.y == 640  or self.y in [x+20 for x in list(zip(*self.__old_coords))[0]]:
+                    self.isdeph = True
+                else: 
+                    self.y += 20    
 
         self.draw() # Redesenha a cobra na sua nova posição
     
@@ -84,8 +97,8 @@ class Apple:
         self.screen = screen
         resolution = self.screen.get_size() # Armazena a resolução da tela
         self.size = size
-        self.x = randint(0,resolution[0] - size)//size*size # Randomiza a posição x da maçã
-        self.y = randint(0,resolution[1] - size)//size*size # Randomiza a posição y da maçã
+        self.x = randint(40,resolution[0] - size - 40)//size*size # Randomiza a posição x da maçã
+        self.y = randint(60,resolution[1] - size - 40)//size*size # Randomiza a posição y da maçã
         self.draw() # Desenha a maçã
 
     def draw(self):
