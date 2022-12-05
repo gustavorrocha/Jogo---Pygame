@@ -72,7 +72,10 @@ class Snake:
 
         # Percorre todos as partes do corpo da cobra
         for num_body in range(self.body_size):
-            body_sprite = self.rotated_sprite(num_body) # Sprite rotacionado da parte do corpo em específico
+            try:
+                body_sprite = self.rotated_sprite(num_body) # Sprite rotacionado da parte do corpo em específico
+            except:
+                body_sprite = self.body_sprite
             self.screen.blit(body_sprite, (self.body[num_body][0], self.body[num_body][1])) # Desenha o sprite encontrado na tela
 
     # Altera a direção caso alguma das teclas "wasd" sejam apertadas
