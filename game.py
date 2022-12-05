@@ -66,11 +66,13 @@ class Game:
         clock = pygame.time.Clock() # Cria um objeto de relógio
         count_ask_dificults = 0
         sound_game_over = False
+        start_music = False
         
         while running:
             clock.tick(self.fps)
             if self.mute:
                 pygame.mixer.stop()
+                pygame.mixer.music.stop()
             if self.state == "main menu":
                 mouse_x, mouse_y = pygame.mouse.get_pos()
 
@@ -206,7 +208,6 @@ class Game:
                     self.screen.blit(self.font.render("Voltar para o menu" , 1, (60,255,60)), (40,350))
                     if click:
                         running = False
-                        # pygame.quit()
                         RESOLUTION = (1280,736) # Resolução do jogo
                         game = Game(RESOLUTION) # Cria o objeto jogo do tipo GAME
                         game.run() # Começa a rodar o jogo
@@ -238,6 +239,7 @@ class Game:
                 if sound_game_over == False:
                     sleep(1)
                     random = randint(1,3)
+                    pygame.mixer.music.stop()
                     game_over_sound = pygame.mixer.Sound(f"./sounds/game_over/game_over{random}.opus")
                     game_over_sound.set_volume(10)
                     game_over_sound.play()
@@ -274,6 +276,11 @@ class Game:
             self.screen.blit(game_back, (0,0))
             game_arena = pygame.image.load("./imgs/background/image2_final.png").convert_alpha()
             self.screen.blit(game_arena, (game_screen[0],game_screen[2]))
+
+            if start_music == False:
+                pygame.mixer.music.load("./sounds/soundtrack.opus")
+                pygame.mixer.music.play(-1)
+                start_music = True
 
             resolution = self.screen.get_size() # Armazena a resolução da tela 
             self.screen.blit(self.font.render("Pontuação: " + str(self.score), 1, (0,0,0)), (1047,13)) # Escreve a pontuação na tela
