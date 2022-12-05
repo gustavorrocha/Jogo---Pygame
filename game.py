@@ -81,10 +81,6 @@ class Game:
                     if event.type == QUIT: # Sai do jogo caso o jogador o feche
                         running = False
                     
-                    if event.type == KEYDOWN:
-                        if event.key == K_ESCAPE:
-                            self.state = "running"
-                    
                     if event.type == MOUSEBUTTONDOWN:
                         if event.button == 1:
                             click = True
